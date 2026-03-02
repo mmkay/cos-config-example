@@ -1,0 +1,99 @@
+# SLO definitions for prometheus-k8s deployed in the welcome-k8s Juju model.
+# These SLOs are forwarded to sloth-k8s which generates Prometheus recording
+# and alerting rules from them.
+#
+# The queries use the full Juju topology to uniquely identify this deployment:
+#   juju_model:       welcome-k8s
+#   juju_model_uuid:  e95b649f-32ff-43a9-8d7e-865d4f0a73ef
+#   juju_application: prometheus-k8s
+#
+# Reference: https://sloth.dev/introduction/slos/
+
+version: "prometheus/v1"
+service: "prometheus-k8s"
+labels:
+  juju_model: "welcome-k8s"
+  juju_model_uuid: "e95b649f-32ff-43a9-8d7e-865d4f0a73ef"
+  juju_application: "prometheus-k8s"
+slos:
+  - name: "requests-availability"
+    description: >
+      Prometheus HTTP API availability SLO.
+      Tracks the ratio of successful (non-5xx) HTTP responses served by Prometheus.
+    objective:
+      value: 99.9
+      window: 30d
+    sli:
+      events:
+        error_query: >
+          sum(rate(prometheus_http_requests_total{
+            job="prometheus-k8s",
+            juju_model="welcome-k8s",
+            juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
+            juju_application="prometheus-k8s",
+            code=~"5.."
+          }[{{.window}}]))
+        total_query: >
+          sum(rate(prometheus_http_requests_total{
+            job="prometheus-k8s",
+            juju_model="welcome-k8s",
+            juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
+            juju_application="prometheus-k8s"
+          }[{{.window}}]))
+    alerting:
+      name: "PrometheusApiHighErrorRate"
+      labels:
+        category: "availability"
+      annotations:
+        summary: "Prometheus HTTP API has a high error rate"
+        description: >
+          Prometheus ({{ $labels.juju_model }}/{{ $labels.juju_application }})
+          is returning 5xx errors for more than 0.1% of requests.
+      page_alert:
+        labels:
+          severity: critical
+      ticket_alert:
+        labels:
+          severity: warning
+
+  - name: "query-latency"
+    description: >
+      Prometheus query API latency SLO.
+      Tracks the ratio of instant queries (/api/v1/query) that complete within 1 second.
+    objective:
+      value: 99.0
+      window: 30d
+    sli:
+      events:
+        error_query: >
+          sum(rate(prometheus_http_request_duration_seconds_bucket{
+            job="prometheus-k8s",
+            juju_model="welcome-k8s",
+            juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
+            juju_application="prometheus-k8s",
+            handler="/api/v1/query",
+            le="1"
+          }[{{.window}}]))
+        total_query: >
+          sum(rate(prometheus_http_request_duration_seconds_count{
+            job="prometheus-k8s",
+            juju_model="welcome-k8s",
+            juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
+            juju_application="prometheus-k8s",
+            handler="/api/v1/query"
+          }[{{.window}}]))
+    alerting:
+      name: "PrometheusQueryHighLatency"
+      labels:
+        category: "latency"
+      annotations:
+        summary: "Prometheus query API has high latency"
+        description: >
+          Prometheus ({{ $labels.juju_model }}/{{ $labels.juju_application }})
+          is taking more than 1 second for more than 1% of instant queries.
+      page_alert:
+        labels:
+          severity: critical
+      ticket_alert:
+        labels:
+          severity: warning
