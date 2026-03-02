@@ -20,9 +20,7 @@ slos:
     description: >
       Prometheus HTTP API availability SLO.
       Tracks the ratio of successful (non-5xx) HTTP responses served by Prometheus.
-    objective:
-      value: 99.9
-      window: 30d
+    objective: 99.9
     sli:
       events:
         error_query: >
@@ -60,9 +58,7 @@ slos:
     description: >
       Prometheus query API latency SLO.
       Tracks the ratio of instant queries (/api/v1/query) that complete within 1 second.
-    objective:
-      value: 99.0
-      window: 30d
+    objective: 99.0
     sli:
       events:
         error_query: >
