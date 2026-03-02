@@ -24,12 +24,12 @@ slos:
     sli:
       events:
         error_query: >
-          sum(rate(prometheus_http_requests_total{
+          (sum(rate(prometheus_http_requests_total{
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s",
             code=~"5.."
-          }[{{.window}}]))
+          }[{{.window}}])) or vector(0))
         total_query: >
           sum(rate(prometheus_http_requests_total{
             juju_model="welcome-k8s",
@@ -60,20 +60,25 @@ slos:
     sli:
       events:
         error_query: >
-          sum(rate(prometheus_http_request_duration_seconds_bucket{
+          (sum(rate(prometheus_http_request_duration_seconds_count{
+            juju_model="welcome-k8s",
+            juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
+            juju_application="prometheus-k8s",
+            handler="/api/v1/query"
+          }[{{.window}}])) - sum(rate(prometheus_http_request_duration_seconds_bucket{
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s",
             handler="/api/v1/query",
             le="1"
-          }[{{.window}}]))
+          }[{{.window}}]))) or vector(0)
         total_query: >
-          sum(rate(prometheus_http_request_duration_seconds_count{
+          (sum(rate(prometheus_http_request_duration_seconds_count{
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s",
             handler="/api/v1/query"
-          }[{{.window}}]))
+          }[{{.window}}])) or vector(1))
     alerting:
       name: "PrometheusQueryHighLatency"
       labels:
