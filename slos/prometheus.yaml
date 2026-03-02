@@ -25,7 +25,6 @@ slos:
       events:
         error_query: >
           sum(rate(prometheus_http_requests_total{
-            job="prometheus-k8s",
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s",
@@ -33,7 +32,6 @@ slos:
           }[{{.window}}]))
         total_query: >
           sum(rate(prometheus_http_requests_total{
-            job="prometheus-k8s",
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s"
@@ -63,7 +61,6 @@ slos:
       events:
         error_query: >
           sum(rate(prometheus_http_request_duration_seconds_bucket{
-            job="prometheus-k8s",
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s",
@@ -72,7 +69,6 @@ slos:
           }[{{.window}}]))
         total_query: >
           sum(rate(prometheus_http_request_duration_seconds_count{
-            job="prometheus-k8s",
             juju_model="welcome-k8s",
             juju_model_uuid="e95b649f-32ff-43a9-8d7e-865d4f0a73ef",
             juju_application="prometheus-k8s",
